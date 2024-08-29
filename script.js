@@ -69,6 +69,7 @@ $(document).ready(function () {
         switch (estadoClima) {
             case 'nublado':
             case 'parcialmente nublado':
+            case 'algunas nubes':
                 imagenClima = 'nublado.png';
                 break;
             case 'lluvia':
