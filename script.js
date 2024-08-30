@@ -16,44 +16,50 @@ $(document).ready(function () {
     }
 
     // Llamada AJAX para obtener las condiciones actuales del clima
-    $.ajax({
-        type: "GET",
-        url: "http://dataservice.accuweather.com/currentconditions/v1/61328?apikey=qe9ybVt9ZfKNRJ5rUTCHAPsbavF1tP44&language=es-cl",
-        success: function (data) {
-            console.log("Datos recibidos:", data); // Verifica la respuesta completa del API
+    function obtenerDatosClima() {
+        $.ajax({
+            url: "http://dataservice.accuweather.com/currentconditions/v1/61328?apikey=qe9ybVt9ZfKNRJ5rUTCHAPsbavF1tP44&language=es-cl",
+            type: "GET",
 
-            if (Array.isArray(data) && data.length > 0) {
-                mostrarDatosClima(data[0]);
-            } else {
-                console.error("La respuesta del API no es un array o está vacía.");
-                $("#result").html("<p>Error: No se recibieron datos válidos del API.</p>");
+            success: function (data) {
+               // console.log("Datos recibidos:", data); // Verifica la respuesta completa del API
+
+                if (Array.isArray(data) && data.length > 0) {
+                    mostrarDatosClima(data[0]);
+                } else {
+                    console.error("La respuesta del API no es un array o está vacía.");
+                    $("#result").html("<p>Error: No se recibieron datos válidos del API.</p>");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error en la solicitud:", status, error);
+                $("#result").html("<p>Error en la solicitud al API.</p>");
             }
-        },
-        error: function (xhr, status, error) {
-            console.error("Error en la solicitud:", status, error);
-            $("#result").html("<p>Error en la solicitud al API.</p>");
-        }
-    });
-
+        });
+    }
     // Llamada AJAX para obtener la información de ubicación
-    $.ajax({
-        type: "GET",
-        url: "http://dataservice.accuweather.com/locations/v1/61328?apikey=qe9ybVt9ZfKNRJ5rUTCHAPsbavF1tP44&language=es-cl&details=true",
-        success: function (data) {
-            console.log("Datos de ubicación recibidos:", data); // Verifica la respuesta completa del API
 
-            if (data && data.Key) {
-                mostrarDatosUbicacion(data);
-            } else {
-                console.error("La respuesta del API de ubicación no es válida.");
-                $("#location-details").html("<p>Error: No se recibieron datos válidos de ubicación del API.</p>");
+    function obtenerDatosUbicacion() {
+        $.ajax({
+            type: "GET",
+            url: "http://dataservice.accuweather.com/locations/v1/61328?apikey=qe9ybVt9ZfKNRJ5rUTCHAPsbavF1tP44&language=es-cl&details=true",
+            success: function (data) {
+                //console.log("Datos de ubicación recibidos:", data); // Verifica la respuesta completa del API
+
+                if (data && data.Key) {
+                    mostrarDatosUbicacion(data);
+                } else {
+                    console.error("La respuesta del API de ubicación no es válida.");
+                    $("#location-details").html("<p>Error: No se recibieron datos válidos de ubicación del API.</p>");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error en la solicitud de ubicación:", status, error);
+                $("#location-details").html("<p>Error en la solicitud al API de ubicación.</p>");
             }
-        },
-        error: function (xhr, status, error) {
-            console.error("Error en la solicitud de ubicación:", status, error);
-            $("#location-details").html("<p>Error en la solicitud al API de ubicación.</p>");
-        }
-    });
+        });
+
+    }
 
     // Función para mostrar los datos del clima
     function mostrarDatosClima(observacion) {
@@ -86,12 +92,12 @@ $(document).ready(function () {
         // Mostrar los datos extraídos en la página
         $("#weather-icon__image").html(`<img src="${imagenClima}" alt="${estadoClima}" />`);
         $("#weather-icon__title").html(
-            `<span>${formatearFecha(observacion.LocalObservationDateTime)}</span>
+            `<span id="hora-actual">${formatearFecha(observacion.LocalObservationDateTime)}</span>
             <p>${estadoClima.charAt(0).toUpperCase() + estadoClima.slice(1)}</p>
             <p>${temperaturaC}°C</p>`
         );
         $("#weather-details").html(`
-            <p>Fecha y hora de observación: ${formatearFecha(observacion.LocalObservationDateTime)}</p>
+            <p id="hora-actual">Fecha y hora de observación: ${formatearFecha(observacion.LocalObservationDateTime)}</p>
             <p>¿Es de día?: ${esDeDia}</p>
             <p>¿Hay precipitación?: ${tienePrecipitacion}</p>
             <p>Tipo de precipitación: ${tipoPrecipitacion}</p>
@@ -114,7 +120,7 @@ $(document).ready(function () {
         $("#weather-icon__title").append(
             `<span>${ciudad}</span>, <span>${region}</span>`
         );
-        
+
         $("#location-details").html(`
             <h3>Información de Ubicación</h3>
             <p><strong>Ciudad:</strong> ${ciudad}</p>
@@ -127,4 +133,17 @@ $(document).ready(function () {
             <p><strong>¿Horario de verano?:</strong> ${esHorarioVerano}</p>
         `);
     }
+
+    obtenerDatosClima();
+    obtenerDatosUbicacion();
+    setInterval(obtenerDatosClima, 60000);
+    setInterval(obtenerDatosUbicacion, 60000);
+
+
+    setInterval(() => {
+        const ahora = new Date();
+        const horas = ahora.getHours().toString().padStart(2, '0'); 
+        const minutos = ahora.getMinutes().toString().padStart(2, '0'); 
+        const segundos = ahora.getSeconds().toString().padStart(2, '0'); 
+        $("#hora-actual").html(`${horas}:${minutos}:${segundos}`);}, 10000);
 });
