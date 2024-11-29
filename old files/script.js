@@ -146,4 +146,22 @@ $(document).ready(function () {
         const minutos = ahora.getMinutes().toString().padStart(2, '0'); 
         const segundos = ahora.getSeconds().toString().padStart(2, '0'); 
         $("#hora-actual").html(`${horas}:${minutos}:${segundos}`);}, 10000);
+
+
+
+    const express = require('express');
+    const cors = require('cors');
+    const app = express();
+
+    app.use(cors());
+
+    app.get('/', (req, res) => {
+        res.send('Hola Mundo!');
+    });
+
+    const puerto = 5501;
+    app.listen(puerto, () => {
+        console.log(`Servidor corriendo en http://localhost:${puerto}`);
+    })
+
 });
